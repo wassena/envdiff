@@ -1,28 +1,38 @@
-"""Entry-point: python -m envdiff <sub-command> [args]"""
+"""Entry-point: python -m envdiff <sub-command> …"""
+from __future__ import annotations
 
+import argparse
 import sys
 
+from envdiff import cli_diff, cli_reconcile, cli_snapshot, cli_lint, cli_template
 
-def main() -> None:
-    if len(sys.argv) < 2:
-        print("usage: envdiff <diff|reconcile|snapshot> [options]")
-        sys.exit(1)
 
-    cmd, rest = sys.argv[1], sys.argv[2:]
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="envdiff",
+        description="Diff, reconcile, lint and template .env files.",
+    )
+    sub = parser.add_subparsers(dest="command", metavar="COMMAND")
+    sub.required = True
 
-    if cmd == "diff":
-        from envdiff.cli_diff import run
-    elif cmd == "reconcile":
-        from envdiff.cli_reconcile import run
-    elif cmd == "snapshot":
-        from envdiff.cli_snapshot import run
-    else:
-        print(f"unknown command: {cmd}", file=sys.stderr)
-        print("available commands: diff, reconcile, snapshot", file=sys.stderr)
-        sys.exit(1)
+    cli_diff.build_parser(sub)
+    cli_reconcile.build_parser(sub)
+    cli_snapshot.build_parser(sub)
+    cli_lint.build_parser(sub)
+    cli_template.build_parser(sub)
 
-    sys.exit(run(rest))
+    args = parser.parse_args(argv)
+
+    dispatch = {
+        "diff": cli_diff.run,
+        "reconcile": cli_reconcile.run,
+        "snapshot": cli_snapshot.run,
+        "lint": cli_lint.run,
+        "template": cli_template.run,
+    }
+
+    return dispatch[args.command](args)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
