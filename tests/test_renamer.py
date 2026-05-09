@@ -81,3 +81,11 @@ def test_rename_result_defaults():
     assert r.skipped == []
     assert r.env == {}
     assert r.rename_count == 0
+
+
+def test_rename_multiple_missing_keys_all_recorded():
+    """All missing keys should appear in skipped, not just the first one."""
+    result = rename_keys(SAMPLE, {"MISSING_ONE": "NEW_ONE", "MISSING_TWO": "NEW_TWO"})
+    assert "MISSING_ONE" in result.skipped
+    assert "MISSING_TWO" in result.skipped
+    assert result.rename_count == 0
