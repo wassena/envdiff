@@ -46,9 +46,31 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
+def _resolve_input_files(base: str, target: str) -> tuple[Path, Path]:
+    """Resolve and validate that both input paths exist and are files.
+
+    Returns a tuple of (base_path, target_path) as Path objects.
+    Raises SystemExit with a descriptive message if either path is invalid.
+    """
+    base_path = Path(base)
+    target_path = Path(target)
+
+    for label, path in (("base", base_path), ("target", target_path)):
+        if not path.exists():
+            print(f"Error: {label} file not found: {path}", file=sys.stderr)
+            raise SystemExit(1)
+        if not path.is_file():
+            print(f"Error: {label} path is not a file: {path}", file=sys.stderr)
+            raise SystemExit(1)
+
+    return base_path, target_path
+
+
 def run(argv=None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    _resolve_input_files(args.base, args.target)
 
     base_env = parse_env_file(args.base)
     target_env = parse_env_file(args.target)
