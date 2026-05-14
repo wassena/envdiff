@@ -46,7 +46,17 @@ def redact_values(
     """Redact *keys* inside *env*, returning a :class:`RedactResult`.
 
     If *keys* is ``None`` every key is redacted.
+
+    Raises
+    ------
+    ValueError
+        If *char* is empty or *length* is less than 1.
     """
+    if not char:
+        raise ValueError("'char' must be a non-empty string")
+    if length < 1:
+        raise ValueError("'length' must be a positive integer")
+
     target_keys = set(keys) if keys is not None else set(env.keys())
     redacted: Dict[str, str] = {}
     redacted_keys: List[str] = []
