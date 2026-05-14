@@ -89,3 +89,11 @@ def test_rename_multiple_missing_keys_all_recorded():
     assert "MISSING_ONE" in result.skipped
     assert "MISSING_TWO" in result.skipped
     assert result.rename_count == 0
+
+
+def test_rename_does_not_mutate_input():
+    """rename_keys should not modify the original dict passed as input."""
+    original = {"DB_HOST": "localhost", "DB_PORT": "5432"}
+    original_copy = dict(original)
+    rename_keys(original, {"DB_HOST": "DATABASE_HOST"})
+    assert original == original_copy
