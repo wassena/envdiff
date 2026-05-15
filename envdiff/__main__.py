@@ -21,6 +21,12 @@ _SUBCOMMANDS = [
     cli_template,
 ]
 
+# Map subcommand name -> module for fast dispatch
+_SUBCOMMAND_MAP = {
+    mod.__name__.split(".")[-1].replace("cli_", ""): mod
+    for mod in _SUBCOMMANDS
+}
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
@@ -38,11 +44,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.print_help()
         return 0
 
-    return _SUBCOMMANDS[
-        [m.__name__.split(".")[-1].replace("cli_", "") for m in _SUBCOMMANDS].index(
-            args.subcommand
-        )
-    ].run(args)
+    return _SUBCOMMAND_MAP[args.subcommand].run(args)
 
 
 if __name__ == "__main__":
