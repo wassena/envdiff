@@ -84,3 +84,19 @@ def test_summary_lists_violations():
     assert "MISSING (required): API_KEY" in summary
     assert "EMPTY VALUE:        SECRET_KEY" in summary
     assert "UNKNOWN KEY:        TYPO_VAR" in summary
+
+
+def test_multiple_missing_required_keys_all_flagged():
+    """All missing required keys should appear in missing_required, not just the first."""
+    env = {}
+    result = validate(env, required=["DATABASE_URL", "SECRET_KEY", "API_KEY"])
+    assert result.missing_required == {"DATABASE_URL", "SECRET_KEY", "API_KEY"}
+    assert not result.is_valid
+
+
+def test_whitespace_only_value_flagged_as_empty():
+    """A value containing only whitespace should be treated as empty."""
+    env = {"DATABASE_URL": "   ", "SECRET_KEY": "abc"}
+    result = validate(env, required=["DATABASE_URL", "SECRET_KEY"], allow_empty=False)
+    assert "DATABASE_URL" in result.empty_values
+    assert not result.is_valid
