@@ -18,6 +18,10 @@ class GroupResult:
         total = sum(len(v) for v in self.groups.values())
         return total + len(self.ungrouped)
 
+    def get_group(self, prefix: str) -> Dict[str, str]:
+        """Return the key/value mapping for *prefix*, or an empty dict if not found."""
+        return self.groups.get(prefix, {})
+
 
 def _extract_prefix(key: str, separator: str = "_") -> Optional[str]:
     """Return the first segment before *separator*, or None if none exists."""
@@ -37,6 +41,14 @@ def group_keys(
 
     Keys whose prefix appears fewer than *min_group_size* times are placed in
     ``ungrouped``.
+
+    Args:
+        env: Dictionary of environment variable key/value pairs.
+        separator: Character used to split keys into prefix and remainder.
+            Defaults to ``"_"``.
+        min_group_size: Minimum number of keys sharing a prefix for that
+            prefix to form its own group.  Prefixes with fewer keys are
+            folded into ``ungrouped``.  Defaults to ``1``.
     """
     prefix_map: Dict[str, Dict[str, str]] = {}
     no_prefix: Dict[str, str] = {}
