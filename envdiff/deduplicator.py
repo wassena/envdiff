@@ -81,3 +81,31 @@ def deduplicate(text: str, keep: str = "last") -> DedupeResult:
 def to_env_string(result: DedupeResult) -> str:
     """Serialise a DedupeResult back to .env format."""
     return "\n".join(f"{k}={v}" for k, v in result.env.items()) + "\n"
+
+
+def deduplicate_file(path: str, keep: str = "last", write: bool = False) -> DedupeResult:
+    """Deduplicate a .env file on disk.
+
+    Parameters
+    ----------
+    path:
+        Path to the .env file to process.
+    keep:
+        ``"last"`` (default) or ``"first"`` — which occurrence to retain.
+    write:
+        If ``True``, overwrite *path* with the deduplicated content.
+
+    Returns
+    -------
+    DedupeResult
+    """
+    with open(path, "r", encoding="utf-8") as fh:
+        text = fh.read()
+
+    result = deduplicate(text, keep=keep)
+
+    if write and result.has_duplicates:
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(to_env_string(result))
+
+    return result
