@@ -28,6 +28,11 @@ def _is_frozen(line: str) -> bool:
     return line.rstrip().endswith(_FROZEN_MARKER)
 
 
+def _extract_key(stripped_line: str) -> str:
+    """Return the key portion of a stripped ``KEY=value`` line."""
+    return stripped_line.split("=", 1)[0].strip()
+
+
 def freeze_values(
     env_string: str,
     keys: Optional[List[str]] = None,
@@ -51,8 +56,7 @@ def freeze_values(
         if not stripped or stripped.startswith("#"):
             continue
         if "=" in stripped and _is_frozen(raw):
-            k = stripped.split("=", 1)[0].strip()
-            frozen_line_keys.add(k)
+            frozen_line_keys.add(_extract_key(stripped))
 
     for k in values:
         if k not in target_keys:
@@ -79,7 +83,7 @@ def freeze_string(
     for raw in env_string.splitlines():
         stripped = raw.strip()
         if stripped and not stripped.startswith("#") and "=" in stripped:
-            k = stripped.split("=", 1)[0].strip()
+            k = _extract_key(stripped)
             if (target_keys is None or k in target_keys) and not _is_frozen(raw):
                 raw = raw.rstrip() + "  " + _FROZEN_MARKER
         out_lines.append(raw)
