@@ -52,8 +52,21 @@ def _compare(a: Dict[str, str], b: Dict[str, str], label_a: str, label_b: str) -
 
 
 def compare_files(path_a: str, path_b: str) -> CompareResult:
-    """Compare two .env files and return a CompareResult."""
-    return _compare(parse_env_file(path_a), parse_env_file(path_b), path_a, path_b)
+    """Compare two .env files and return a CompareResult.
+
+    Raises:
+        FileNotFoundError: If either file path does not exist.
+        OSError: If a file cannot be read.
+    """
+    try:
+        env_a = parse_env_file(path_a)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"File not found: {path_a}")
+    try:
+        env_b = parse_env_file(path_b)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"File not found: {path_b}")
+    return _compare(env_a, env_b, path_a, path_b)
 
 
 def compare_strings(text_a: str, text_b: str, label_a: str = "A", label_b: str = "B") -> CompareResult:
